@@ -1,4 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import json
 # import qrcode
 # import logging
 
@@ -30,12 +31,19 @@ def photo(bot, update):
 	photo_file.download(str(user.id) + '.jpg')
 	update.message.reply_text('Получил!')
 
+def json(bot, update):
+	user = update.message.from_user
+	json_file = bot.get_file(update.message.document.file_id)
+	json_file.download(str(user.id) + '.json')
+	update.message.reply_text('Получил!')
+
 
 
 
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(MessageHandler(Filters.photo, photo))
+dispatcher.add_handler(MessageHandler(Filters.document, json))
 
 
 
