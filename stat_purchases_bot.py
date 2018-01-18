@@ -1,0 +1,37 @@
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import qrcode
+# import logging
+
+token_file = open('token.txt')
+token = token_file.read()
+
+updater = Updater(token=token)
+dispatcher = updater.dispatcher
+
+# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+# 	level=logging.INFO)
+
+
+
+
+def start(bot, update):
+	update.message.reply_text(
+		'Привет!\n'
+		'Я помогу тебе следить за расходами на покупки.\n'
+		'Чтобы начать вести статистику, пришли мне фотографию чека.\n'
+		'Чтобы посмотреть список команд, набери /help')
+
+def help(bot, update):
+	update.message.reply_text('TODO: сделать список команд')
+
+
+
+
+dispatcher.add_handler(CommandHandler('start', start))
+dispatcher.add_handler(CommandHandler('help', help))
+
+
+
+
+
+updater.start_polling()
