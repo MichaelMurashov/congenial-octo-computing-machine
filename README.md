@@ -1,0 +1,1 @@
+stat_purchases_bot
