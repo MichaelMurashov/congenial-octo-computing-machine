@@ -1,5 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import qrcode
+# import qrcode
 # import logging
 
 token_file = open('token.txt')
@@ -24,12 +24,18 @@ def start(bot, update):
 def help(bot, update):
 	update.message.reply_text('TODO: сделать список команд')
 
+def photo(bot, update):
+	user = update.message.from_user
+	photo_file = bot.get_file(update.message.photo[-1].file_id)
+	photo_file.download(str(user.id) + '.jpg')
+	update.message.reply_text('Получил!')
+
 
 
 
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', help))
-
+dispatcher.add_handler(MessageHandler(Filters.photo, photo))
 
 
 
