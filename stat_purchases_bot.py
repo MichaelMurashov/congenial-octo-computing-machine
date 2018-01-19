@@ -18,7 +18,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-
+# Старт бота, регистрация пользователя
 def start(bot, update):
 	telegram_user = update.message.from_user
 
@@ -35,10 +35,12 @@ def start(bot, update):
 		'Чтобы посмотреть список команд, набери /help'
 		% telegram_user.first_name)
 
+# Список команд
 def help(bot, update):
 	bot.sendMessage(update.message.chat_id,
 		'TODO: сделать список команд')
 
+# Сообщение с фото
 def photo(bot, update):
 	user = update.message.from_user
 
@@ -48,6 +50,7 @@ def photo(bot, update):
 
 	bot.sendMessage(update.message.chat_id, 'Получил!')
 
+# Сообщение с файлом
 def json_file(bot, update):
 	telegram_user = update.message.from_user
 
@@ -67,6 +70,7 @@ def json_file(bot, update):
 
 	bot.sendMessage(update.message.chat_id, 'Получил!')
 
+# Итоговая сумма
 def sum(bot, update):
 	telegram_user = update.message.from_user
 
@@ -79,6 +83,23 @@ def sum(bot, update):
 	bot.sendMessage(update.message.chat_id,
 		'Общая сумма = %s'
 		% user.sum)
+
+# Очистка статистики
+def clean(bot, update):
+	telegram_user = update.message.from_user
+
+	if not telegram_user.id in users:
+		bot.sendMessage(update.message.chat_id,
+			'Нет данных для удаления.\n'
+			'Чтобы начать вести статистику, отправь /start')
+		return
+
+	user = users[telegram_user.id]
+	user.sum = 0;
+
+	bot.sendMessage(update.message.chat_id,
+		'Статистика удалена')
+
 
 
 
@@ -98,6 +119,7 @@ def main():
 	dispatcher.add_handler(MessageHandler(Filters.photo, photo))
 	dispatcher.add_handler(MessageHandler(Filters.document, json_file))
 	dispatcher.add_handler(CommandHandler('sum', sum))
+	dispatcher.add_handler(CommandHandler('clean', clean))
 
 	updater.start_polling()
 	updater.idle()
