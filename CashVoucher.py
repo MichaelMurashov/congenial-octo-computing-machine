@@ -1,23 +1,34 @@
 import json
 import logging
 
+from item import Item
+
 logger = logging.getLogger(__name__)
 
+
 class CashVoucher:
-	def __init__(self):
-		self.parsed = ""
+    __totalSum = 0
+    __dateTime = 0  # unix time format
+    __items = []
 
-	def load(self, file_path):
-		file = open(file_path, encoding='utf-8')
-		self.parsed = json.load(file)
+    __json_str = ""
 
-		logger.info('Successful parser cash voucher from file %s' 
-			% file_path)
-		
-		file.close()
+    def get_totalsum(self):
+        return self.__totalSum
 
-	def isEmpty(self):
-		if self.parsed == "":
-			return 1
-		else:
-			return 0
+    def get_datetime(self):
+        return self.__dateTime
+
+    def load(self, file_path):
+        file = open(file_path, encoding='utf-8')
+        self.__json_str = json.load(file)
+
+        self.__totalSum = self.__json_str['totalSum'] / 100
+        self.__dateTime = self.__json_str['dateTime']
+        for buy in self.__json_str['items']:
+            item = Item(buy['name'], buy['price'] / 100, buy['quantity'], buy['sum'] / 100)
+            self.__items.append(item)
+
+        logger.info('Successful parser cash voucher from file %s' % file_path)
+
+        file.close()

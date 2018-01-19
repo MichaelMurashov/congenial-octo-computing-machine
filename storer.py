@@ -3,6 +3,7 @@ import shelve
 
 logger = logging.getLogger(__name__)
 
+
 class Storer:
     def __init__(self, filename):
         self.filename = filename
@@ -16,8 +17,7 @@ class Storer:
         db = shelve.open(self.filename)
         if key in db:
             obj = db[key]
-            logger.info("Successful load data by key '%s' info from file %s"
-                % (key, self.filename))
+            logger.info("Successful load data by key '%s' info from file %s" % (key, self.filename))
         else:
             obj = None
 
