@@ -3,8 +3,6 @@ token\.txt
 
 __pycache__/
 
-users\.db\.bak
+users\.db\*
 
-users\.db\.dat
-
-users\.db\.dir
+\.idea/
