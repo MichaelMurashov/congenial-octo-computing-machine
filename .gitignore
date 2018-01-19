@@ -2,3 +2,9 @@
 token\.txt
 
 __pycache__/
+
+users\.db\.bak
+
+users\.db\.dat
+
+users\.db\.dir
