@@ -1,22 +1,9 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import json
+from CashVoucher import CashVoucher
 # import qrcode
 # import logging
 
-class CashVoucher(object):
-	def __init__(self):
-		self.parsed = ""
 
-	def load(self, file_path):
-		file = open(file_path, encoding='utf-8')
-		self.parsed = json.load(file)
-		file.close()
-
-	def isEmpty(self):
-		if self.parsed == "":
-			return 1
-		else:
-			return 0
 
 cash_voucher = CashVoucher()
 
