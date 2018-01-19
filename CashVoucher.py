@@ -1,6 +1,6 @@
 import json
 
-class CashVoucher(object):
+class CashVoucher:
 	def __init__(self):
 		self.parsed = ""
 
