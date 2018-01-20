@@ -29,6 +29,4 @@ class CashVoucher:
             item = Item(buy['name'], buy['price'] / 100, buy['quantity'], buy['sum'] / 100)
             self.__items.append(item)
 
-        logger.info('Successful parser cash voucher from file %s' % file_path)
-
         file.close()

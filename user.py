@@ -2,8 +2,18 @@ import logging
 import time
 
 from cashvoucher import CashVoucher
+from date import Date
 
 logger = logging.getLogger(__name__)
+
+'''
+    Формат date_key: YYYYMMDD
+    Пример: 20170130
+'''
+DAY = 1
+WEEK = 7 * DAY
+MONTH = 100
+YEAR = 10000
 
 
 class User:
@@ -31,20 +41,31 @@ class User:
         self.__total_sum += cash_voucher.get_totalsum()
 
         unix_time = cash_voucher.get_datetime()
-        key_day = time.strftime("%Y%m%d", time.localtime(unix_time))
-        if not (key_day in self.__archive):
-            self.__archive[key_day] = []
-        self.__archive[key_day].append(cash_voucher)
+        date_key = int(time.strftime("%Y%m%d", time.localtime(unix_time)))
 
-        logger.info('Successful load cash voucher from file %s' % file_path)
+        if not (date_key in self.__archive):
+            self.__archive[date_key] = []
+        self.__archive[date_key].append(cash_voucher)
 
-    def get_daysum(self, unix_time):
-        key_day = time.strftime("%Y%m%d", time.localtime(unix_time))
-
+    def get_day_sum(self, date_key):
         result_sum = 0
-        if key_day in self.__archive:
-            cash_vouchers = self.__archive[key_day]
+        if date_key in self.__archive:
+            cash_vouchers = self.__archive[date_key]
             for cash_voucher in cash_vouchers:
                 result_sum += cash_voucher.get_totalsum()
+
+        return result_sum
+
+    def get_today_sum(self):
+        unix_today = time.time()
+        date_key = int(time.strftime("%Y%m%d", time.localtime(unix_today)))
+        return self.get_day_sum(date_key)
+
+    def get_week_sum(self):
+        result_sum = 0
+        unix_today = time.time()
+        today = int(time.strftime("%Y%m%d", time.localtime(unix_today)))
+        for i in range(WEEK):
+            result_sum += self.get_day_sum(today - i)
 
         return result_sum

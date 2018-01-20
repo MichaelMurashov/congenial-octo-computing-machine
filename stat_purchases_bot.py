@@ -5,6 +5,8 @@ import os
 
 from storer import Storer
 from user import User
+import myfilters
+from date import Date
 
 STORED_FILE = 'users.db'
 storer = Storer(STORED_FILE)
@@ -84,19 +86,83 @@ def total_sum(bot, update):
 
 
 # Сумма за заданный день
-def get_daysum(bot, update):
+def get_day_sum(bot, update):
     telegram_user = update.message.from_user
+    if not (telegram_user.id in users):
+        bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
+        return
 
+    date = Date(update.message.text)
+    if not(date.check_date()):
+        bot.sendMessage(update.message.chat_id, 'Такой даты не существует!')
+        return
+
+    user = users[telegram_user.id]
+    sum = user.get_day_sum(date.get_date_key())
+    if not (sum == 0):
+        bot.sendMessage(update.message.chat_id, 'Сумма за день (%s) = %s' % (update.message.text, sum))
+    else:
+        bot.sendMessage(update.message.chat_id, 'В этот день покупок не зарегистировано.')
+
+
+# Сумма за сегодня
+def get_today_sum(bot, update):
+    telegram_user = update.message.from_user
     if not (telegram_user.id in users):
         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
         return
 
     user = users[telegram_user.id]
-    sum = user.get_daysum(1514654820)
+    sum = user.get_today_sum()
     if not (sum == 0):
-        bot.sendMessage(update.message.chat_id, 'Сумма за день %s = %s' % (1514654820, sum))
+        bot.sendMessage(update.message.chat_id, 'Сумма за сегодня = %s' % sum)
     else:
-        bot.sendMessage(update.message.chat_id, 'В этот день покупок не зарегистировано!')
+        bot.sendMessage(update.message.chat_id, 'Сегодня покупок не зарегистировано.')
+
+
+# Сумма за прошедшую неделю
+def get_week_sum(bot, update):
+    telegram_user = update.message.from_user
+    if not (telegram_user.id in users):
+        bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
+        return
+
+    user = users[telegram_user.id]
+    sum = user.get_week_sum()
+    if not (sum == 0):
+        bot.sendMessage(update.message.chat_id, 'Сумма за прошедшую неделю = %s' % sum)
+    else:
+        bot.sendMessage(update.message.chat_id, 'За прошедшую неделю покупок не зарегистировано.')
+
+
+# Сумма за прошедший месяц
+# def get_month_sum(bot, update):
+#     telegram_user = update.message.from_user
+#     if not (telegram_user.id in users):
+#         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
+#         return
+#
+#     user = users[telegram_user.id]
+#     sum = user.get_month_sum()
+#     if not (sum == 0):
+#         bot.sendMessage(update.message.chat_id, 'Сумма за прошедший месяц = %s' % sum)
+#     else:
+#         bot.sendMessage(update.message.chat_id, 'За прошедший месяц покупок не зарегистировано.')
+#
+#
+# # Сумма за прошедший год
+# def get_year_sum(bot, update):
+#     telegram_user = update.message.from_user
+#     if not (telegram_user.id in users):
+#         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
+#         return
+#
+#     user = users[telegram_user.id]
+#     sum = user.get_year_sum()
+#     if not (sum == 0):
+#         bot.sendMessage(update.message.chat_id, 'Сумма за прошедший год = %s' % sum)
+#     else:
+#         bot.sendMessage(update.message.chat_id, 'За прошедший год покупок не зарегистировано.')
 
 
 # Очистка статистики
@@ -130,10 +196,21 @@ def main():
     dispatcher.add_handler(CommandHandler('help', commands_list))
     dispatcher.add_handler(CommandHandler('sum', total_sum))
     dispatcher.add_handler(CommandHandler('clean', clean))
-    dispatcher.add_handler(CommandHandler('daysum', get_daysum))
 
     dispatcher.add_handler(MessageHandler(Filters.photo, photo))
     dispatcher.add_handler(MessageHandler(Filters.document, json_file))
+
+    date_filter = myfilters.DateFilter()
+    today_filter = myfilters.TodayFilter()
+    week_filter = myfilters.WeekFilter()
+    # month_filter = myfilters.MonthFilter()
+    # year_filter = myfilters.YearFilter()
+
+    dispatcher.add_handler(MessageHandler(date_filter, get_day_sum))
+    dispatcher.add_handler(MessageHandler(today_filter, get_today_sum))
+    dispatcher.add_handler(MessageHandler(week_filter, get_week_sum))
+    # dispatcher.add_handler(MessageHandler(month_filter, get_month_sum))
+    # dispatcher.add_handler(MessageHandler(year_filter, get_year_sum))
 
     updater.start_polling()
     updater.idle()
