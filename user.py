@@ -1,8 +1,7 @@
 import logging
 import time
 
-from cashvoucher import CashVoucher
-from date import Date
+from helper_classes.cashvoucher import CashVoucher
 
 logger = logging.getLogger(__name__)
 

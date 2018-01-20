@@ -1,7 +1,7 @@
 import json
 import logging
 
-from item import Item
+from helper_classes.item import Item
 
 logger = logging.getLogger(__name__)
 

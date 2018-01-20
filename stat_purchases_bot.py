@@ -5,8 +5,8 @@ import os
 
 from storer import Storer
 from user import User
-import myfilters
-from date import Date
+from helper_classes import myfilters
+from helper_classes.date import Date
 
 STORED_FILE = 'users.db'
 storer = Storer(STORED_FILE)
