@@ -26,3 +26,13 @@ class MonthFilter(BaseFilter):
 class YearFilter(BaseFilter):
     def filter(self, message):
         return 'Год' in message.text
+
+
+class SumFilter(BaseFilter):
+    def filter(self, message):
+        return 'Сумма' in message.text
+
+
+class HelpFilter(BaseFilter):
+    def filter(self, message):
+        return 'Список команд' in message.text

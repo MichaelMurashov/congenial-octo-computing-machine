@@ -37,9 +37,9 @@ def start(bot, update):
 def commands_list(bot, update):
     bot.sendMessage(update.message.chat_id,
         'Список команд:\n'
-        '/sum - показать общую сумму по всем покупкам\n'
-        '/clean - очистить статисти\n'
-        '/help - показать команды')
+        '"Сумма" - показать общую сумму по всем покупкам\n'
+        '/clean - очистить статистику\n'
+        '"Список команд" - показать команды')
 
 
 # Сообщение с фото
@@ -193,8 +193,6 @@ def main():
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('help', commands_list))
-    dispatcher.add_handler(CommandHandler('sum', total_sum))
     dispatcher.add_handler(CommandHandler('clean', clean))
 
     dispatcher.add_handler(MessageHandler(Filters.photo, photo))
@@ -205,12 +203,16 @@ def main():
     week_filter = myfilters.WeekFilter()
     # month_filter = myfilters.MonthFilter()
     # year_filter = myfilters.YearFilter()
+    sum_filter = myfilters.SumFilter()
+    help_filter = myfilters.HelpFilter()
 
     dispatcher.add_handler(MessageHandler(date_filter, get_day_sum))
     dispatcher.add_handler(MessageHandler(today_filter, get_today_sum))
     dispatcher.add_handler(MessageHandler(week_filter, get_week_sum))
     # dispatcher.add_handler(MessageHandler(month_filter, get_month_sum))
     # dispatcher.add_handler(MessageHandler(year_filter, get_year_sum))
+    dispatcher.add_handler(MessageHandler(sum_filter, total_sum))
+    dispatcher.add_handler(MessageHandler(help_filter, commands_list))
 
     updater.start_polling()
     updater.idle()
