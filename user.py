@@ -14,8 +14,8 @@ class User:
         self.archive = {}
 
     def clear_archive(self):
-        self.__archive.clear()
-        self.__total_sum = 0
+        self.archive.clear()
+        self.total_sum = 0
 
     def add_purchase(self, file_path):
         cash_voucher = CashVoucher()

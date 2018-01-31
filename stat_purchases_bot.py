@@ -19,28 +19,37 @@ logger = logging.getLogger(__name__)
 def start(bot, update):
     telegram_user = update.message.from_user
 
-    logger.info("Start for user: %s" % telegram_user)
-
     if not (telegram_user.id in users):
+        logger.info("Start for user: %s" % telegram_user)
         users[telegram_user.id] = User(telegram_user.id)
         storer.store('users', users)
-
-    bot.sendMessage(update.message.chat_id,
-        'Привет, %s!\n'
-        'Я помогу тебе следить за расходами на покупки.\n'
-        'Чтобы начать вести статистику, пришли мне json-файл с иформацией.\n'
-        'Чтобы посмотреть список команд, набери /help' % telegram_user.first_name)
+        bot.sendMessage(
+            update.message.chat_id,
+            'Привет, %s!\n'
+            'Я помогу Вам следить за расходами на покупки.\n'
+            'Чтобы начать вести статистику, пришлите мне json-файл с иформацией.\n'
+            'Чтобы посмотреть список команд, введите /help или "Список команд"' % telegram_user.first_name
+        )
+    else:
+        bot.sendMessage(
+            update.message.chat_id,
+            'Вы уже зарегистрированы в системе.\n'
+            'Чтобы начать вести статистику, пришлите мне json-файл с иформацией.\n'
+            'Чтобы посмотреть список команд, введите /help или "Список команд"'
+        )
 
 
 # Список команд
 def commands_list(bot, update):
-    bot.sendMessage(update.message.chat_id,
-        '''Список команд:
-        /sum или "Сумма" - показать общую сумму по всем покупкам
-        /today или "Сегодня" - показать сумму за сегодня
-        /month или "Месяц" - показать сумму за текущий месяц
-        /clean - очистить всю статистику
-        /help или "Список команд" - показать список команд''')
+    bot.sendMessage(
+        update.message.chat_id,
+        'Список команд:\n'
+        '/sum или "Сумма" - показать общую сумму по всем покупкам\n'
+        '/today или "Сегодня" - показать сумму за сегодня\n'
+        '/month или "Месяц" - показать сумму за текущий месяц\n'
+        '/clean - очистить всю статистику\n'
+        '/help или "Список команд" - показать список команд'
+    )
 
 
 # Сообщение с фото
@@ -59,7 +68,10 @@ def json_file(bot, update):
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
-        bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику отправь /start')
+        bot.sendMessage(
+            update.message.chat_id,
+            'Чтобы начать вести статистику, Вам нужно заоегистрироваться.\n'
+            'Для этого введите /start')
         return
 
     file_json = bot.get_file(update.message.document.file_id)
