@@ -6,3 +6,5 @@ __pycache__/
 users\.db\*
 
 \.idea/
+
+qwe\.py
