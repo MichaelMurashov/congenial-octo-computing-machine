@@ -11,7 +11,7 @@ from helper_classes.date import Date
 STORED_FILE = 'users.db'
 storer = Storer(STORED_FILE)
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -29,17 +29,18 @@ def start(bot, update):
         'Привет, %s!\n'
         'Я помогу тебе следить за расходами на покупки.\n'
         'Чтобы начать вести статистику, пришли мне json-файл с иформацией.\n'
-        'Чтобы посмотреть список команд, набери /help'
-        % telegram_user.first_name)
+        'Чтобы посмотреть список команд, набери /help' % telegram_user.first_name)
 
 
 # Список команд
 def commands_list(bot, update):
     bot.sendMessage(update.message.chat_id,
-        'Список команд:\n'
-        '"Сумма" - показать общую сумму по всем покупкам\n'
-        '/clean - очистить статистику\n'
-        '"Список команд" - показать команды')
+        '''Список команд:
+        /sum или "Сумма" - показать общую сумму по всем покупкам
+        /today или "Сегодня" - показать сумму за сегодня
+        /month или "Месяц" - показать сумму за текущий месяц
+        /clean - очистить всю статистику
+        /help или "Список команд" - показать список команд''')
 
 
 # Сообщение с фото
@@ -82,7 +83,7 @@ def total_sum(bot, update):
         return
 
     user = users[telegram_user.id]
-    bot.sendMessage(update.message.chat_id, 'Общая сумма = %s' % user.get_totalsum())
+    bot.sendMessage(update.message.chat_id, 'Общая сумма = %s' % user.total_sum)
 
 
 # Сумма за заданный день
@@ -92,13 +93,14 @@ def get_day_sum(bot, update):
         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
         return
 
-    date = Date(update.message.text)
-    if not(date.check_date()):
+    date = Date()
+    date.from_message(update.message.text)
+    if not(date.is_date()):
         bot.sendMessage(update.message.chat_id, 'Такой даты не существует!')
         return
 
     user = users[telegram_user.id]
-    sum = user.get_day_sum(date.get_date_key())
+    sum = user.get_day_sum(date)
     if not (sum == 0):
         bot.sendMessage(update.message.chat_id, 'Сумма за день (%s) = %s' % (update.message.text, sum))
     else:
@@ -120,49 +122,19 @@ def get_today_sum(bot, update):
         bot.sendMessage(update.message.chat_id, 'Сегодня покупок не зарегистировано.')
 
 
-# Сумма за прошедшую неделю
-def get_week_sum(bot, update):
+# Сумма за текущий месяц
+def get_month_sum(bot, update):
     telegram_user = update.message.from_user
     if not (telegram_user.id in users):
         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
         return
 
     user = users[telegram_user.id]
-    sum = user.get_week_sum()
+    sum = user.get_month_sum()
     if not (sum == 0):
-        bot.sendMessage(update.message.chat_id, 'Сумма за прошедшую неделю = %s' % sum)
+        bot.sendMessage(update.message.chat_id, 'Сумма за прошедший месяц = %s' % sum)
     else:
-        bot.sendMessage(update.message.chat_id, 'За прошедшую неделю покупок не зарегистировано.')
-
-
-# Сумма за прошедший месяц
-# def get_month_sum(bot, update):
-#     telegram_user = update.message.from_user
-#     if not (telegram_user.id in users):
-#         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
-#         return
-#
-#     user = users[telegram_user.id]
-#     sum = user.get_month_sum()
-#     if not (sum == 0):
-#         bot.sendMessage(update.message.chat_id, 'Сумма за прошедший месяц = %s' % sum)
-#     else:
-#         bot.sendMessage(update.message.chat_id, 'За прошедший месяц покупок не зарегистировано.')
-#
-#
-# # Сумма за прошедший год
-# def get_year_sum(bot, update):
-#     telegram_user = update.message.from_user
-#     if not (telegram_user.id in users):
-#         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
-#         return
-#
-#     user = users[telegram_user.id]
-#     sum = user.get_year_sum()
-#     if not (sum == 0):
-#         bot.sendMessage(update.message.chat_id, 'Сумма за прошедший год = %s' % sum)
-#     else:
-#         bot.sendMessage(update.message.chat_id, 'За прошедший год покупок не зарегистировано.')
+        bot.sendMessage(update.message.chat_id, 'За прошедший месяц покупок не зарегистировано.')
 
 
 # Очистка статистики
@@ -193,26 +165,28 @@ def main():
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('help', commands_list))
+    dispatcher.add_handler(CommandHandler('sum', total_sum))
     dispatcher.add_handler(CommandHandler('clean', clean))
+    dispatcher.add_handler(CommandHandler('month', get_month_sum))
+    dispatcher.add_handler(CommandHandler('today', get_today_sum))
 
     dispatcher.add_handler(MessageHandler(Filters.photo, photo))
     dispatcher.add_handler(MessageHandler(Filters.document, json_file))
 
+    help_filter = myfilters.HelpFilter()
+    sum_filter = myfilters.SumFilter()
+
     date_filter = myfilters.DateFilter()
     today_filter = myfilters.TodayFilter()
-    week_filter = myfilters.WeekFilter()
-    # month_filter = myfilters.MonthFilter()
-    # year_filter = myfilters.YearFilter()
-    sum_filter = myfilters.SumFilter()
-    help_filter = myfilters.HelpFilter()
+    month_filter = myfilters.MonthFilter()
+
+    dispatcher.add_handler(MessageHandler(help_filter, commands_list))
+    dispatcher.add_handler(MessageHandler(sum_filter, total_sum))
 
     dispatcher.add_handler(MessageHandler(date_filter, get_day_sum))
     dispatcher.add_handler(MessageHandler(today_filter, get_today_sum))
-    dispatcher.add_handler(MessageHandler(week_filter, get_week_sum))
-    # dispatcher.add_handler(MessageHandler(month_filter, get_month_sum))
-    # dispatcher.add_handler(MessageHandler(year_filter, get_year_sum))
-    dispatcher.add_handler(MessageHandler(sum_filter, total_sum))
-    dispatcher.add_handler(MessageHandler(help_filter, commands_list))
+    dispatcher.add_handler(MessageHandler(month_filter, get_month_sum))
 
     updater.start_polling()
     updater.idle()
