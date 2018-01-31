@@ -1,32 +1,29 @@
 import json
 import logging
 
+from helper_classes.date import Date
+
 from helper_classes.item import Item
 
 logger = logging.getLogger(__name__)
 
 
 class CashVoucher:
-    __totalSum = 0
-    __dateTime = 0  # unix time format
-    __items = []
+    def __init__(self):
+        self.total_sum = 0
+        self.date_time = Date()
+        self.items = []
+        self.json_str = ""
 
-    __json_str = ""
-
-    def get_totalsum(self):
-        return self.__totalSum
-
-    def get_datetime(self):
-        return self.__dateTime
-
-    def load(self, file_path):
+    def load_from_file(self, file_path):
         file = open(file_path, encoding='utf-8')
-        self.__json_str = json.load(file)
+        self.json_str = json.load(file)
 
-        self.__totalSum = self.__json_str['totalSum'] / 100
-        self.__dateTime = self.__json_str['dateTime']
-        for buy in self.__json_str['items']:
+        self.total_sum = self.json_str['totalSum'] / 100
+        self.date_time.from_unix_format(self.json_str['dateTime'])
+
+        for buy in self.json_str['items']:
             item = Item(buy['name'], buy['price'] / 100, buy['quantity'], buy['sum'] / 100)
-            self.__items.append(item)
+            self.items.append(item)
 
         file.close()

@@ -13,19 +13,9 @@ class TodayFilter(BaseFilter):
         return 'Сегодня' in message.text
 
 
-class WeekFilter(BaseFilter):
-    def filter(self, message):
-        return 'Неделя' in message.text
-
-
 class MonthFilter(BaseFilter):
     def filter(self, message):
         return 'Месяц' in message.text
-
-
-class YearFilter(BaseFilter):
-    def filter(self, message):
-        return 'Год' in message.text
 
 
 class SumFilter(BaseFilter):
