@@ -81,6 +81,8 @@ def json_file(bot, update):
     user = users[telegram_user.id]
     user.add_purchase(file_path)
 
+    storer.store('users', users)
+
     os.remove(file_path)
 
     bot.sendMessage(update.message.chat_id, 'Получил!')
