@@ -8,3 +8,5 @@ users\.db\*
 \.idea/
 
 qwe\.py
+
+venv/

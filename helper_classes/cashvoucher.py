@@ -2,7 +2,6 @@ import json
 import logging
 
 from helper_classes.date import Date
-
 from helper_classes.item import Item
 
 logger = logging.getLogger(__name__)
