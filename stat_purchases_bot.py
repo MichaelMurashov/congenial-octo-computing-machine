@@ -1,10 +1,11 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import os
-# import qrcode
 
 from storer import Storer
 from user import User
+import decoder
+from request import request
 from helper_classes import myfilters
 from helper_classes.date import Date
 
@@ -54,17 +55,6 @@ def commands_list(bot, update):
 
 # Сообщение с фото
 def photo(bot, update):
-    user = update.message.from_user
-
-    photo_file = bot.get_file(update.message.photo[-1].file_id)
-    file_path = str(user.id) + ".jpg"
-    photo_file.download(file_path)
-
-    bot.sendMessage(update.message.chat_id, 'Получил!')
-
-
-# Сообщение с файлом
-def json_file(bot, update):
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
@@ -74,18 +64,56 @@ def json_file(bot, update):
             'Для этого введите /start')
         return
 
-    file_json = bot.get_file(update.message.document.file_id)
-    file_path = str(telegram_user.id) + ".txt"
-    file_json.download(file_path)
+    photo_file = bot.get_file(update.message.photo[-1].file_id)
+    file_path = str(telegram_user.id) + ".jpg"
+    photo_file.download(file_path)
 
-    user = users[telegram_user.id]
-    user.add_purchase(file_path)
+    bot.sendMessage(update.message.chat_id, 'Получил фото!\т\n'
+                                            'Ведется обработка...')
 
-    storer.store('users', users)
+    data = decoder.decode(file_path)
 
-    os.remove(file_path)
+    if data is not None:
+        file_json = open(str(telegram_user.id) + '.txt', 'w')
+        file_json.write(request(data))
 
-    bot.sendMessage(update.message.chat_id, 'Получил!')
+        user = users[telegram_user.id]
+        user.add_purchase(file_json)
+
+        storer.store('users', users)
+
+        os.remove(file_path)
+
+        bot.sendMessage(update.message.chat_id, 'Обработка завершена!\n'
+                                                'Чек добавлен.')
+    else:
+        bot.sendMessage(update.message.chat_id, 'Обработка не завершена!\n'
+                                                'Попробуйте еще раз.')
+
+
+# Сообщение с файлом
+# def json_file(bot, update):
+#     telegram_user = update.message.from_user
+#
+#     if not (telegram_user.id in users):
+#         bot.sendMessage(
+#             update.message.chat_id,
+#             'Чтобы начать вести статистику, Вам нужно заоегистрироваться.\n'
+#             'Для этого введите /start')
+#         return
+#
+#     file_json = bot.get_file(update.message.document.file_id)
+#     file_path = str(telegram_user.id) + ".txt"
+#     file_json.download(file_path)
+#
+#     user = users[telegram_user.id]
+#     user.add_purchase(file_path)
+#
+#     storer.store('users', users)
+#
+#     os.remove(file_path)
+#
+#     bot.sendMessage(update.message.chat_id, 'Получил!')
 
 
 # Итоговая сумма
@@ -186,7 +214,7 @@ def main():
     dispatcher.add_handler(CommandHandler('today', get_today_sum))
 
     dispatcher.add_handler(MessageHandler(Filters.photo, photo))
-    dispatcher.add_handler(MessageHandler(Filters.document, json_file))
+    # dispatcher.add_handler(MessageHandler(Filters.document, json_file))
 
     help_filter = myfilters.HelpFilter()
     sum_filter = myfilters.SumFilter()
