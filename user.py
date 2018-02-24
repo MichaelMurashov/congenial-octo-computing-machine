@@ -57,4 +57,7 @@ class User:
             result_sum += self.get_day_sum(date)
             date.subtract_day()
 
+        first_day_sum = self.get_day_sum(date)
+        result_sum += first_day_sum
+
         return result_sum
