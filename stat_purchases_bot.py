@@ -28,16 +28,20 @@ def start(bot, update):
             update.message.chat_id,
             'Привет, %s!\n'
             'Я помогу Вам следить за расходами на покупки.\n'
-            'Чтобы начать вести статистику, пришлите мне json-файл с иформацией.\n'
+            'Чтобы начать вести статистику, пришлите мне фотографию QR-кода на чеке.\n'
             'Чтобы посмотреть список команд, введите /help или "Список команд"' % telegram_user.first_name
         )
+        bot.sendMessage(update.message.chat_id, 'Пример:')
+        bot.send_photo(update.message.chat_id, open('examples/example.jpg', 'rb'))
     else:
         bot.sendMessage(
             update.message.chat_id,
             'Вы уже зарегистрированы в системе.\n'
-            'Чтобы начать вести статистику, пришлите мне json-файл с иформацией.\n'
+            'Чтобы начать вести статистику, пришлите мне фотографию QR-кода на чеке.\n'
             'Чтобы посмотреть список команд, введите /help или "Список команд"'
         )
+        bot.sendMessage(update.message.chat_id, 'Пример:')
+        bot.send_photo(update.message.chat_id, open('examples/example.jpg', 'rb'))
 
 
 # Список команд
@@ -163,9 +167,11 @@ def clean(bot, update):
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
-        bot.sendMessage(update.message.chat_id,
+        bot.sendMessage(
+            update.message.chat_id,
             'Нет данных для удаления.\n'
-            'Чтобы начать вести статистику, отправь /start')
+            'Чтобы начать вести статистику, отправь /start'
+        )
         return
 
     user = users[telegram_user.id]
