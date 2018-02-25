@@ -28,4 +28,8 @@ def parse_data(data):
 def decode(file_path):
     image = Image.open(file_path)
     decoded_objects = pyzbar.decode(image)
-    return parse_data(decoded_objects[0].data.decode())
+
+    if decoded_objects != []:
+        return parse_data(decoded_objects[0].data.decode())
+    else:
+        return None

@@ -33,6 +33,7 @@ class User:
     def get_day_sum(self, date):
         result_sum = 0
         date_key = date.get_date_key()
+
         if date_key in self.archive:
             cash_vouchers = self.archive[date_key]
             for cash_voucher in cash_vouchers:
@@ -41,23 +42,18 @@ class User:
         return result_sum
 
     def get_today_sum(self):
-        unix_today = time.time()
         date = Date()
-        date.from_unix_format(unix_today)
+        date.set_today()
 
         return self.get_day_sum(date)
 
     def get_month_sum(self):
         result_sum = 0
-        unix_today = time.time()
         date = Date()
-        date.from_unix_format(unix_today)
+        date.set_today()
 
-        while int(date.day) > 1:
+        while date.day > 1:
             result_sum += self.get_day_sum(date)
-            date.subtract_day()
-
-        first_day_sum = self.get_day_sum(date)
-        result_sum += first_day_sum
+            date.day -= 1
 
         return result_sum

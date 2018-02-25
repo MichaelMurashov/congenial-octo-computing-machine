@@ -4,7 +4,7 @@ import requests
 def request(data):
     response = requests.get(
         'https://proverkacheka.nalog.ru:9999/v1/inns/*/kkts/*/fss/' + data.fss + '/tickets/' + data.tickets +
-        '?fiscalSign=' + data.fascal_sign + '&sendToEmail=no',
+        '?fiscalSign=' + data.facial_sign + '&sendToEmail=no',
         auth=('+79506268244', '510506'),
         headers={
             'Authorization': 'Basic Kzc5NTA2MjY4MjQ0OjUxMDUwNg==',

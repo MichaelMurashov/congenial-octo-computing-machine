@@ -65,55 +65,33 @@ def photo(bot, update):
         return
 
     photo_file = bot.get_file(update.message.photo[-1].file_id)
-    file_path = str(telegram_user.id) + ".jpg"
-    photo_file.download(file_path)
+    photo_path = str(telegram_user.id) + ".jpg"
+    photo_file.download(photo_path)
 
-    bot.sendMessage(update.message.chat_id, 'Получил фото!\т\n'
+    bot.sendMessage(update.message.chat_id, 'Получил фото!\n'
                                             'Ведется обработка...')
 
-    data = decoder.decode(file_path)
+    data = decoder.decode(photo_path)
 
     if data is not None:
-        file_json = open(str(telegram_user.id) + '.txt', 'w')
+        json_path = str(telegram_user.id) + '.txt'
+        file_json = open(json_path, 'w')
         file_json.write(request(data))
+        file_json.close()
 
         user = users[telegram_user.id]
-        user.add_purchase(file_json)
+        user.add_purchase(json_path)
 
         storer.store('users', users)
 
-        os.remove(file_path)
+        os.remove(photo_path)
+        os.remove(json_path)
 
         bot.sendMessage(update.message.chat_id, 'Обработка завершена!\n'
                                                 'Чек добавлен.')
     else:
         bot.sendMessage(update.message.chat_id, 'Обработка не завершена!\n'
                                                 'Попробуйте еще раз.')
-
-
-# Сообщение с файлом
-# def json_file(bot, update):
-#     telegram_user = update.message.from_user
-#
-#     if not (telegram_user.id in users):
-#         bot.sendMessage(
-#             update.message.chat_id,
-#             'Чтобы начать вести статистику, Вам нужно заоегистрироваться.\n'
-#             'Для этого введите /start')
-#         return
-#
-#     file_json = bot.get_file(update.message.document.file_id)
-#     file_path = str(telegram_user.id) + ".txt"
-#     file_json.download(file_path)
-#
-#     user = users[telegram_user.id]
-#     user.add_purchase(file_path)
-#
-#     storer.store('users', users)
-#
-#     os.remove(file_path)
-#
-#     bot.sendMessage(update.message.chat_id, 'Получил!')
 
 
 # Итоговая сумма
@@ -144,7 +122,7 @@ def get_day_sum(bot, update):
     user = users[telegram_user.id]
     sum = user.get_day_sum(date)
     if not (sum == 0):
-        bot.sendMessage(update.message.chat_id, 'Сумма за день (%s) = %s' % (update.message.text, sum))
+        bot.sendMessage(update.message.chat_id, 'Сумма за день %s = %s' % (update.message.text, sum))
     else:
         bot.sendMessage(update.message.chat_id, 'В этот день покупок не зарегистировано.')
 
@@ -214,7 +192,6 @@ def main():
     dispatcher.add_handler(CommandHandler('today', get_today_sum))
 
     dispatcher.add_handler(MessageHandler(Filters.photo, photo))
-    # dispatcher.add_handler(MessageHandler(Filters.document, json_file))
 
     help_filter = myfilters.HelpFilter()
     sum_filter = myfilters.SumFilter()

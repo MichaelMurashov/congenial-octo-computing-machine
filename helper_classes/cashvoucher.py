@@ -15,11 +15,11 @@ class CashVoucher:
         self.json_str = ""
 
     def load_from_file(self, file_path):
-        file = open(file_path, encoding='utf-8')
-        self.json_str = json.load(file)
+        file = open(file_path)
+        self.json_str = json.load(file)['document']['receipt']
 
         self.total_sum = self.json_str['totalSum'] / 100
-        self.date_time.from_unix_format(self.json_str['dateTime'])
+        self.date_time.from_json(self.json_str['dateTime'])
 
         for buy in self.json_str['items']:
             item = Item(buy['name'], buy['price'] / 100, buy['quantity'], buy['sum'] / 100)
