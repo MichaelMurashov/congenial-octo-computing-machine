@@ -1,4 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import telegram
 import logging
 import os
 
@@ -79,21 +80,27 @@ def photo(bot, update):
     data = decoder.decode(photo_path)
 
     if data is not None:
-        json_path = str(telegram_user.id) + '.txt'
-        file_json = open(json_path, 'w')
-        file_json.write(request(data))
-        file_json.close()
+        text = request(data)
 
-        user = users[telegram_user.id]
-        user.add_purchase(json_path)
+        if text != '':
+            json_path = str(telegram_user.id) + '.txt'
+            file_json = open(json_path, 'w')
+            file_json.write(request(data))
+            file_json.close()
 
-        storer.store('users', users)
+            user = users[telegram_user.id]
+            user.add_purchase(json_path)
 
-        os.remove(photo_path)
-        os.remove(json_path)
+            storer.store('users', users)
 
-        bot.sendMessage(update.message.chat_id, 'Обработка завершена!\n'
-                                                'Чек добавлен.')
+            os.remove(photo_path)
+            os.remove(json_path)
+
+            bot.sendMessage(update.message.chat_id, 'Обработка завершена!\n'
+                                                    'Чек добавлен.')
+        else:
+            bot.sendMessage(update.message.chat_id, 'Обработка завершена.\n'
+                                                    'Чек отсутствует в базе ФНС. Повторите попытку позже.')
     else:
         bot.sendMessage(update.message.chat_id, 'Обработка не завершена!\n'
                                                 'Попробуйте еще раз.')
@@ -176,7 +183,6 @@ def clean(bot, update):
 
     user = users[telegram_user.id]
     user.clear_archive()
-
     bot.sendMessage(update.message.chat_id, 'Статистика удалена')
 
 
@@ -214,7 +220,7 @@ def main():
     dispatcher.add_handler(MessageHandler(today_filter, get_today_sum))
     dispatcher.add_handler(MessageHandler(month_filter, get_month_sum))
 
-    updater.start_polling()
+    updater.start_polling(timeout=60)
     updater.idle()
 
 
