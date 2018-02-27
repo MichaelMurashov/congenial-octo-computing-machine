@@ -14,6 +14,17 @@ class Date:
         self.month = int(re.split(r'\.', date_str)[1])
         self.year = int(re.split(r'\.', date_str)[2])
 
+    def from_add_purchase(self, message):
+        split = re.split(r' ', message)
+
+        if len(split) == 3:
+            self.from_message(split[1])
+
+            if self.is_date():
+                return int(split[2])
+
+        return None
+
     def from_json(self, date):
         date_ = re.split(r'T', date)[0]
 
@@ -27,12 +38,11 @@ class Date:
         self.day = time.gmtime()[2]
 
     def is_date(self):
-        logger.info('%d %d %d' % (self.year, self.month, self.day))
-        if not (1970 <= self.year and self.year <= 2038):
+        if not(self.year in range(1970, 2038)):
             return False
-        elif not (1 <= self.month and self.month <= 12):
+        elif not(self.month in range(1, 12)):
             return False
-        elif not (1 <= self.day and self.day <= 31):
+        elif not(self.day in range(1, 31)):
             return False
         else:
             return True

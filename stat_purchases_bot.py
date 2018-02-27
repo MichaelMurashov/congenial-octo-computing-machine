@@ -1,5 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import telegram
+# import telegram
 import logging
 import os
 
@@ -186,6 +186,26 @@ def clean(bot, update):
     bot.sendMessage(update.message.chat_id, 'Статистика удалена')
 
 
+# Ручное добавление покупки
+def add_purchase(bot, update):
+    telegram_user = update.message.from_user
+    if not (telegram_user.id in users):
+        bot.sendMessage(
+            update.message.chat_id,
+            'Чтобы начать вести статистику, Вам нужно заоегистрироваться.\n'
+            'Для этого введите /start')
+        return
+
+    user = users[telegram_user.id]
+    error = user.add_custom_purchase(update.message.text)
+
+    if error is False:
+        bot.sendMessage(update.message.chat_id, 'Ошибка в данных! Попробуйте еще раз.')
+    else:
+        storer.store('users', users)
+        bot.sendMessage(update.message.chat_id, 'Покупка успешно добавлена!')
+
+
 def main():
     global users
     users = storer.restore('users')
@@ -213,6 +233,8 @@ def main():
     today_filter = myfilters.TodayFilter()
     month_filter = myfilters.MonthFilter()
 
+    add_purchase_filter = myfilters.AddPurchaseFilter()
+
     dispatcher.add_handler(MessageHandler(help_filter, commands_list))
     dispatcher.add_handler(MessageHandler(sum_filter, total_sum))
 
@@ -220,10 +242,11 @@ def main():
     dispatcher.add_handler(MessageHandler(today_filter, get_today_sum))
     dispatcher.add_handler(MessageHandler(month_filter, get_month_sum))
 
+    dispatcher.add_handler(MessageHandler(add_purchase_filter, add_purchase))
+
     updater.start_polling(timeout=60)
     updater.idle()
 
 
 if __name__ == '__main__':
     main()
-

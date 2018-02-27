@@ -1,5 +1,4 @@
 import logging
-import time
 
 from helper_classes.cashvoucher import CashVoucher
 from helper_classes.date import Date
@@ -29,6 +28,27 @@ class User:
         if not (date_key in self.archive):
             self.archive[date_key] = []
         self.archive[date_key].append(cash_voucher)
+
+    def add_custom_purchase(self, message):
+        cash_voucher = CashVoucher()
+        date = Date()
+
+        total_sum = date.from_add_purchase(message)
+
+        if total_sum is None:
+            return False
+
+        cash_voucher.total_sum = total_sum
+        cash_voucher.date_time = date
+
+        date_key = date.get_date_key()
+
+        self.total_sum = cash_voucher.total_sum
+        if not (date_key in self.archive):
+            self.archive[date_key] = []
+        self.archive[date_key].append(cash_voucher)
+
+        return True
 
     def get_day_sum(self, date):
         result_sum = 0

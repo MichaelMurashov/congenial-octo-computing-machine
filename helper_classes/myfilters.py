@@ -5,7 +5,7 @@ from telegram.ext import BaseFilter
 class DateFilter(BaseFilter):
     def filter(self, message):
         date = re.search(r'\d{2}-|\.\d{2}-|\.\d{4}', message.text)
-        return not(date is None)
+        return not(date is None) and not('Добавить' in message.text)
 
 
 class TodayFilter(BaseFilter):
@@ -26,3 +26,8 @@ class SumFilter(BaseFilter):
 class HelpFilter(BaseFilter):
     def filter(self, message):
         return 'Список команд' in message.text
+
+
+class AddPurchaseFilter(BaseFilter):
+    def filter(self, message):
+        return 'Добавить' in message.text

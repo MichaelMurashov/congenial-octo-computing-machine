@@ -29,7 +29,7 @@ def decode(file_path):
     image = Image.open(file_path)
     decoded_objects = pyzbar.decode(image)
 
-    if decoded_objects != []:
+    if len(decoded_objects) != 0:
         return parse_data(decoded_objects[0].data.decode())
     else:
         return None
