@@ -1,5 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 import logging
 import os
 
@@ -50,12 +50,15 @@ def commands_list(bot, update):
     bot.sendMessage(
         update.message.chat_id,
         'Список команд:\n'
-        '/sum или "Сумма" - показать общую сумму по всем покупкам\n'
-        '/today или "Сегодня" - показать сумму за сегодня\n'
-        '/month или "Месяц" - показать сумму за текущий месяц\n'
+        '/sum или `Сумма` - показать общую сумму по всем покупкам\n'
+        '/today или `Сегодня` - показать сумму за сегодня\n'
+        '/month или `Месяц` - показать сумму за текущий месяц\n'
         '/clean - очистить всю статистику\n'
-        '/help или "Список команд" - показать список команд\n\n'
-        'Чтобы показать сумму за конкретный день, введите дату в формате "ДД.ММ.ГГГГ"'
+        '/help или `Список команд` - показать список команд\n\n'
+        'Чтобы показать сумму за конкретный день, введите дату в формате `ДД.ММ.ГГГГ`\n\n'
+        'Чтобы вручную добавить покупку, нужно ввести `Добавить`, дату в формате `ДД.ММ.ГГГГ` и сумму.\n'
+        'Пример: `Добавить 01.01.2001 120`',
+        parse_mode=ParseMode.MARKDOWN
     )
 
 
@@ -115,7 +118,9 @@ def total_sum(bot, update):
         return
 
     user = users[telegram_user.id]
-    bot.sendMessage(update.message.chat_id, 'Общая сумма = %s' % user.total_sum)
+    bot.sendMessage(update.message.chat_id,
+                    'Общая сумма = `%s`' % user.total_sum,
+                    parse_mode=ParseMode.MARKDOWN)
 
 
 # Сумма за заданный день
@@ -134,7 +139,9 @@ def get_day_sum(bot, update):
     user = users[telegram_user.id]
     sum = user.get_day_sum(date)
     if not (sum == 0):
-        bot.sendMessage(update.message.chat_id, 'Сумма за день %s = %s' % (update.message.text, sum))
+        bot.sendMessage(update.message.chat_id,
+                        'Сумма за день `%s` = %s' % (update.message.text, sum),
+                        parse_mode=ParseMode.MARKDOWN)
     else:
         bot.sendMessage(update.message.chat_id, 'В этот день покупок не зарегистировано.')
 
@@ -147,9 +154,11 @@ def get_today_sum(bot, update):
         return
 
     user = users[telegram_user.id]
-    sum = user.get_today_sum()
-    if not (sum == 0):
-        bot.sendMessage(update.message.chat_id, 'Сумма за сегодня = %s' % sum)
+    day_sum = user.get_today_sum()
+    if not (day_sum == 0):
+        bot.sendMessage(update.message.chat_id,
+                        'Сумма за сегодня = `%s`' % day_sum,
+                        parse_mode=ParseMode.MARKDOWN)
     else:
         bot.sendMessage(update.message.chat_id, 'Сегодня покупок не зарегистировано.')
 
@@ -188,6 +197,7 @@ def clean(bot, update):
                     reply_markup=reply_markup)
 
 
+# Подтверждение покупки
 def confirm_clean(bot, update):
     query = update.callback_query
 
