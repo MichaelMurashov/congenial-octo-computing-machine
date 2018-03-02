@@ -1,5 +1,5 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-# import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 import os
 
@@ -174,16 +174,34 @@ def clean(bot, update):
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
-        bot.sendMessage(
-            update.message.chat_id,
-            'Нет данных для удаления.\n'
-            'Чтобы начать вести статистику, отправь /start'
-        )
+        bot.sendMessage(update.message.chat_id,
+                        'Нет данных для удаления.\n'
+                        'Чтобы начать вести статистику, отправь /start')
         return
 
-    user = users[telegram_user.id]
-    user.clear_archive()
-    bot.sendMessage(update.message.chat_id, 'Статистика удалена')
+    keyboard = [[InlineKeyboardButton("Да", callback_data='Да'),
+                 InlineKeyboardButton("Нет", callback_data='Нет')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    bot.sendMessage(chat_id=update.message.chat_id,
+                    text='Вы точно хотите удалить всю статистику?',
+                    reply_markup=reply_markup)
+
+
+def confirm_clean(bot, update):
+    query = update.callback_query
+
+    if query.data == 'Да':
+        user = users[query.message.chat_id]
+        user.clear_archive()
+
+        bot.edit_message_text(chat_id=query.message.chat_id,
+                              message_id=query.message.message_id,
+                              text='Статистика удалена')
+    elif query.data == 'Нет':
+        bot.edit_message_text(chat_id=query.message.chat_id,
+                              message_id=query.message.message_id,
+                              text='Вы ответили "Нет"')
 
 
 # Ручное добавление покупки
@@ -216,6 +234,8 @@ def main():
 
     updater = Updater(token)
     dispatcher = updater.dispatcher
+
+    dispatcher.add_handler(CallbackQueryHandler(confirm_clean))
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', commands_list))
