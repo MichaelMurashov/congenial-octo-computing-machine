@@ -89,6 +89,7 @@ def photo(bot, update):
 
         if data is None:
             bot.sendMessage(update.message.chat_id, 'Фото плохого качества. Попробуйте еще раз.')
+            os.remove(photo_path)
             return
 
     text = request(data)
@@ -178,7 +179,7 @@ def get_month_sum(bot, update):
     user = users[telegram_user.id]
     sum = user.get_month_sum()
     if not (sum == 0):
-        bot.sendMessage(update.message.chat_id, 'Сумма за прошедший месяц = %s' % sum)
+        bot.sendMessage(update.message.chat_id, 'Сумма за прошедший месяц = %s' % round(sum, 2))
     else:
         bot.sendMessage(update.message.chat_id, 'За прошедший месяц покупок не зарегистировано.')
 
