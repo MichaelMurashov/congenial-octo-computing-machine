@@ -21,7 +21,7 @@ class Date:
             self.from_message(split[1])
 
             if self.is_date():
-                return int(split[2])
+                return float(split[2])
 
         return None
 

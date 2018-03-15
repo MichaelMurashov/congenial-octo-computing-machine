@@ -82,31 +82,36 @@ def photo(bot, update):
 
     data = decoder.decode(photo_path)
 
-    if data is not None:
-        text = request(data)
+    if data is None:
+        bot.sendMessage(update.message.chat_id, 'Ведется обработка изображения...\n'
+                                                'Пожалуйста, подождите...')
+        data = decoder.decode_with_img_proc(photo_path)
 
-        if text != '':
-            json_path = str(telegram_user.id) + '.txt'
-            file_json = open(json_path, 'w')
-            file_json.write(request(data))
-            file_json.close()
+        if data is None:
+            bot.sendMessage(update.message.chat_id, 'Фото плохого качества. Попробуйте еще раз.')
+            return
 
-            user = users[telegram_user.id]
-            user.add_purchase(json_path)
+    text = request(data)
 
-            storer.store('users', users)
+    if text != '':
+        json_path = str(telegram_user.id) + '.txt'
+        file_json = open(json_path, 'w')
+        file_json.write(text)
+        file_json.close()
 
-            os.remove(photo_path)
-            os.remove(json_path)
+        user = users[telegram_user.id]
+        user.add_purchase(json_path)
 
-            bot.sendMessage(update.message.chat_id, 'Обработка завершена!\n'
-                                                    'Чек добавлен.')
-        else:
-            bot.sendMessage(update.message.chat_id, 'Обработка завершена.\n'
-                                                    'Чек отсутствует в базе ФНС. Повторите попытку позже.')
+        storer.store('users', users)
+
+        os.remove(photo_path)
+        os.remove(json_path)
+
+        bot.sendMessage(update.message.chat_id, 'Обработка завершена!\n'
+                                                'Чек добавлен.')
     else:
-        bot.sendMessage(update.message.chat_id, 'Обработка не завершена!\n'
-                                                'Попробуйте еще раз.')
+        bot.sendMessage(update.message.chat_id, 'Обработка завершена.\n'
+                                                'Чек отсутствует в базе ФНС. Повторите попытку позже.')
 
 
 # Итоговая сумма
@@ -274,7 +279,7 @@ def main():
 
     dispatcher.add_handler(MessageHandler(add_purchase_filter, add_purchase))
 
-    updater.start_polling(timeout=60)
+    updater.start_polling(timeout=120)
     updater.idle()
 
 

@@ -1,4 +1,7 @@
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def request(data):
@@ -19,4 +22,5 @@ def request(data):
         }
     )
 
+    logger.info('%s' % response.status_code)
     return response.text
