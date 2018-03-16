@@ -10,7 +10,7 @@ from request import request
 from helper_classes import myfilters
 from helper_classes.date import Date
 
-STORED_FILE = 'users.db'
+STORED_FILE = 'data/users.db'
 storer = Storer(STORED_FILE)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(message)s', level=logging.INFO)
@@ -125,7 +125,7 @@ def total_sum(bot, update):
 
     user = users[telegram_user.id]
     bot.sendMessage(update.message.chat_id,
-                    'Общая сумма = `%s`' % user.total_sum,
+                    'Общая сумма = `%s`' % round(user.total_sum, 2),
                     parse_mode=ParseMode.MARKDOWN)
 
 
@@ -146,7 +146,7 @@ def get_day_sum(bot, update):
     sum = user.get_day_sum(date)
     if not (sum == 0):
         bot.sendMessage(update.message.chat_id,
-                        'Сумма за день `%s` = %s' % (update.message.text, sum),
+                        'Сумма за день `%s` = %s' % (update.message.text, round(sum, 2)),
                         parse_mode=ParseMode.MARKDOWN)
     else:
         bot.sendMessage(update.message.chat_id, 'В этот день покупок не зарегистировано.')
@@ -163,7 +163,7 @@ def get_today_sum(bot, update):
     day_sum = user.get_today_sum()
     if not (day_sum == 0):
         bot.sendMessage(update.message.chat_id,
-                        'Сумма за сегодня = `%s`' % day_sum,
+                        'Сумма за сегодня = `%s`' % round(day_sum, 2),
                         parse_mode=ParseMode.MARKDOWN)
     else:
         bot.sendMessage(update.message.chat_id, 'Сегодня покупок не зарегистировано.')
@@ -246,7 +246,7 @@ def main():
     if users is None:
         users = {}
 
-    token = open('token.txt').read()
+    token = open('data/token.txt').read()
 
     updater = Updater(token)
     dispatcher = updater.dispatcher
@@ -281,7 +281,7 @@ def main():
     dispatcher.add_handler(MessageHandler(add_purchase_filter, add_purchase))
 
     updater.start_polling(timeout=120)
-    updater.idle()
+    # updater.idle()
 
 
 if __name__ == '__main__':
