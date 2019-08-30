@@ -6,7 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 class Data:
-    def __init__(self, _fn, _fp, _i):
+    def __init__(self, _t, _s, _fn, _i, _fp):
+        self.time = _t
+        self.sum = _s
         self.fss = _fn
         self.tickets = _i
         self.facial_sign = _fp
@@ -14,13 +16,15 @@ class Data:
 
 def parse_data(data):
     result = re.split(r'&', data)
-
+    logger.info(data)
+    t = re.split(r'=', result[0])[1]
+    s = re.split(r'=', result[1])[1]
     fn = re.split(r'=', result[2])[1]
-    fp = re.split(r'=', result[4])[1]
     i = re.split(r'=', result[3])[1]
+    fp = re.split(r'=', result[4])[1]
 
-    if fn != '' and fp != '' and i != '':
-        return Data(fn, fp, i)
+    if t != '' and s != '' and fn != '' and fp != '' and i != '':
+        return Data(t, s, fn, i, fp)
     else:
         return None
 
