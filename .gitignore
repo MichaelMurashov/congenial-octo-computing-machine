@@ -10,3 +10,5 @@ users\.db\*
 qwe\.py
 
 venv/
+
+data/

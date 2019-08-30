@@ -16,9 +16,12 @@ storer = Storer(STORED_FILE)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+proxi = {}
+
 
 # Старт бота, регистрация пользователя
-def start(bot, update):
+def start(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
@@ -46,7 +49,8 @@ def start(bot, update):
 
 
 # Список команд
-def commands_list(bot, update):
+def commands_list(update, contex):
+    bot = contex.bot
     bot.sendMessage(
         update.message.chat_id,
         'Список команд:\n'
@@ -63,13 +67,14 @@ def commands_list(bot, update):
 
 
 # Сообщение с фото
-def photo(bot, update):
+def photo(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
         bot.sendMessage(
             update.message.chat_id,
-            'Чтобы начать вести статистику, Вам нужно заоегистрироваться.\n'
+            'Чтобы начать вести статистику, Вам нужно зарегистрироваться.\n'
             'Для этого введите /start')
         return
 
@@ -116,7 +121,8 @@ def photo(bot, update):
 
 
 # Итоговая сумма
-def total_sum(bot, update):
+def total_sum(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
@@ -130,7 +136,8 @@ def total_sum(bot, update):
 
 
 # Сумма за заданный день
-def get_day_sum(bot, update):
+def get_day_sum(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
     if not (telegram_user.id in users):
         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
@@ -153,7 +160,8 @@ def get_day_sum(bot, update):
 
 
 # Сумма за сегодня
-def get_today_sum(bot, update):
+def get_today_sum(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
     if not (telegram_user.id in users):
         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
@@ -170,7 +178,8 @@ def get_today_sum(bot, update):
 
 
 # Сумма за текущий месяц
-def get_month_sum(bot, update):
+def get_month_sum(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
     if not (telegram_user.id in users):
         bot.sendMessage(update.message.chat_id, 'Чтобы начать вести статистику, отправь /start')
@@ -185,7 +194,8 @@ def get_month_sum(bot, update):
 
 
 # Очистка статистики
-def clean(bot, update):
+def clean(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
 
     if not (telegram_user.id in users):
@@ -204,7 +214,8 @@ def clean(bot, update):
 
 
 # Подтверждение покупки
-def confirm_clean(bot, update):
+def confirm_clean(update, contex):
+    bot = contex.bot
     query = update.callback_query
 
     if query.data == 'Да':
@@ -221,7 +232,8 @@ def confirm_clean(bot, update):
 
 
 # Ручное добавление покупки
-def add_purchase(bot, update):
+def add_purchase(update, contex):
+    bot = contex.bot
     telegram_user = update.message.from_user
     if not (telegram_user.id in users):
         bot.sendMessage(
@@ -248,7 +260,7 @@ def main():
 
     token = open('data/token.txt').read()
 
-    updater = Updater(token)
+    updater = Updater(token, use_context=True, request_kwargs={'proxy_url' : open('data/proxy.txt').read()})
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CallbackQueryHandler(confirm_clean))
